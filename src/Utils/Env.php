@@ -48,6 +48,6 @@ class Env
      */
     public static function vars()
     {
-        return new Arr($_ENV); 
+        return new Arr(getenv()); 
     }
 }
