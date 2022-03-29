@@ -3,6 +3,7 @@
 namespace Timedoor\TmdMidtransIris;
 
 use PHPUnit\Framework\TestCase;
+use Timedoor\TmdMidtransIris\Utils\Env;
 
 class BaseTestCase extends TestCase
 {
@@ -13,7 +14,7 @@ class BaseTestCase extends TestCase
      */
     public function isMockingDisabled()
     {
-        return boolean(getenv('DISABLE_MOCKING')) === true;
+        return boolean(Env::get('DISABLE_MOCKING')) === true;
     }
 
     /**
@@ -23,7 +24,7 @@ class BaseTestCase extends TestCase
      */
     public function disableMocking()
     {
-        putenv('DISABLE_MOCKING=true');
+        Env::set('DISABLE_MOCKING', true);
     }
 
     /**
@@ -33,6 +34,6 @@ class BaseTestCase extends TestCase
      */
     public function enableMocking()
     {
-        putenv('DISABLE_MOCKING=false');
+        Env::set('DISABLE_MOCKING', false);
     }
 }

@@ -13,15 +13,15 @@ use Timedoor\TmdMidtransIris\Api\ApiClient;
 use Timedoor\TmdMidtransIris\Beneficiary;
 use Timedoor\TmdMidtransIris\Models\Beneficiary as BeneficiaryModel;
 use Timedoor\TmdMidtransIris\Utils\Arr;
-use Timedoor\TmdMidtransIris\Utils\Dumper;
+use Timedoor\TmdMidtransIris\Utils\Env;
 use Timedoor\TmdMidtransIris\Utils\Json;
 
 class BeneficiaryTest extends BaseTestCase
 {
     public function setUp(): void
     {
-        Config::$apiKey         = $_ENV['API_KEY'];
-        Config::$merchantKey    = $_ENV['MERCHANT_KEY'];
+        Config::$apiKey         = Env::get('API_KEY');
+        Config::$merchantKey    = Env::get('MERCHANT_KEY');
     }
 
     /**
