@@ -33,8 +33,22 @@ class Arr
      * @param   string      $key
      * @return  mixed|null
      */
-    public function get($key)
+    public function get($key, $default = null)
     {
-        return $this->has($key) ? $this->attributes[$key] : null;
+        if (!$this->has($key)) {
+            return $default;
+        }
+
+        return $this->attributes[$key];
+    }
+
+    /**
+     * Get all values
+     *
+     * @return mixed
+     */
+    public function all()
+    {
+        return $this->attributes; 
     }
 }
