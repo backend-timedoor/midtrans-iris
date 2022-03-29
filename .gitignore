@@ -1,0 +1,9 @@
+# the vendor directory
+vendor
+
+# PHPUnit specific files
+phpunit.integration.xml
+.phpunit.result.cache
+
+# other files
+docker-compose.yml
