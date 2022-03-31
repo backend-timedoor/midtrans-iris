@@ -11,7 +11,7 @@ class BaseService
      *
      * @var IApiClient
      */
-    private $apiClient;
+    protected $apiClient;
 
     public function __construct(IApiClient $apiClient)
     {
