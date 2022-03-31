@@ -7,8 +7,8 @@ use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use Timedoor\TmdMidtransIris\Config;
 use Timedoor\TmdMidtransIris\Dto\PayoutRequest;
+use Timedoor\TmdMidtransIris\Exception\BadRequestException;
 use Timedoor\TmdMidtransIris\Payout;
-use Timedoor\TmdMidtransIris\Utils\Dumper;
 use Timedoor\TmdMidtransIris\Utils\Env;
 use Timedoor\TmdMidtransIris\Utils\Json;
 
@@ -78,7 +78,7 @@ class PayoutTest extends BaseTestCase
 
     public function testExceptionHandlingCreatePayout()
     {
-        $body = [
+        $expect = [
             'error_message' => 'An error occurred when creating payouts',
             'errors'        => [
                 [
@@ -89,7 +89,7 @@ class PayoutTest extends BaseTestCase
         ];
 
         $service = $this->createMockService([
-            new Response(400, [], Json::encode($body))
+            new Response(400, [], Json::encode($expect))
         ]);
 
         $payouts = [
@@ -101,15 +101,18 @@ class PayoutTest extends BaseTestCase
                 ->setNotes('just an example payout')
         ];
 
-        $response = $service->create($payouts);
-
-        $this->assertEquals(400, $response->getCode());
-        $this->assertEquals($body, $response->getBody());
+        try {
+            $service->create($payouts);
+        } catch (BadRequestException $e) {
+            $this->assertEquals(400, $e->getCode());
+            $this->assertEquals($expect['error_message'], $e->getMessage());
+            $this->assertEquals($expect['errors'], $e->getErrors());
+        }
     }
 
     public function testApprovePayout()
     {
-        $notfoundExpect = [
+        $errorExpect = [
             'error_message' => 'An error occurred when approving payouts',
             'errors'        => [
                 'Payouts not found. Please check reference nos'
@@ -122,25 +125,28 @@ class PayoutTest extends BaseTestCase
             new RequestException(
                 'bad request',
                 new Request('POST', 'test'),
-                new Response(400, [], Json::encode($notfoundExpect))
+                new Response(400, [], Json::encode($errorExpect))
             ),
             new Response(202, [], Json::encode($successExpect))
         ]);
 
-        $notfoundResp = $service->approve(['10438f2b393005']);
+        try {
+            $service->approve(['10438f2b393005']);
+        } catch (BadRequestException $e) {
+            $this->assertEquals(400, $e->getCode());
+            $this->assertEquals($errorExpect['error_message'], $e->getMessage());
+            $this->assertEquals($errorExpect['errors'], $e->getErrors());
+        }
 
-        $this->assertEquals(400, $notfoundResp->getCode());
-        $this->assertEquals($notfoundExpect, $notfoundResp->getBody());
+        $response = $service->approve(['wfe8ck5z85bdxb21ts'], '540067');
 
-        $successResp = $service->approve(['wfe8ck5z85bdxb21ts'], '540067');
-
-        $this->assertEquals(202, $successResp->getCode());
-        $this->assertEquals($successExpect, $successResp->getBody());
+        $this->assertEquals(202, $response->getCode());
+        $this->assertEquals($successExpect, $response->getBody());
     }
 
     public function testRejectPayout()
     {
-        $notfoundExpect = [
+        $errorExpect = [
             'error_message' => 'An error occurred when rejecting payouts',
             'errors'        => [
                 'Payouts not found. Please check reference nos'
@@ -153,35 +159,38 @@ class PayoutTest extends BaseTestCase
             new RequestException(
                 'Bad Request',
                 new Request('POST', 'test'),
-                new Response(400, [], Json::encode($notfoundExpect))
+                new Response(400, [], Json::encode($errorExpect))
             ),
             new Response(202, [], Json::encode($successExpect))
         ]);
 
-        $notfoundResp = $service->reject(['10438f2b393005'], 'reject test payout');
+        try {
+            $service->reject(['10438f2b393005'], 'reject test payout');
+        } catch (BadRequestException $e) {
+            $this->assertEquals(400, $e->getCode());
+            $this->assertEquals($errorExpect['error_message'], $e->getMessage());
+            $this->assertEquals($errorExpect['errors'], $e->getErrors());
+        }
 
-        $this->assertEquals(400, $notfoundResp->getCode());
-        $this->assertEquals($notfoundExpect, $notfoundResp->getBody());
+        $response = $service->reject(['f8ecexm43dads2am4n'], 'invalid payout amount');
 
-        $successResp = $service->reject(['f8ecexm43dads2am4n'], 'invalid payout amount');
-
-        $this->assertEquals(202, $successResp->getCode());
-        $this->assertEquals($successExpect, $successResp->getBody());
+        $this->assertEquals(202, $response->getCode());
+        $this->assertEquals($successExpect, $response->getBody());
     }
 
     public function testGetPayoutDetails()
     {
         $expect = [
-            "amount"                => "200000.00",
-            "beneficiary_name"      => "Peter Parker",
-            "beneficiary_account"   => "1213141516",
-            "bank"                  => "Bank Central Asia ( BCA )",
-            "reference_no"          => "83hgf882",
-            "notes"                 => "just for fun",
-            "status"                => "queued",
-            "created_by"            => "John Doe",
-            "created_at"            => "2022-03-29T00:00:00Z",
-            "updated_at"            => "2022-03-29T00:00:00Z"
+            'amount'                => '200000.00',
+            'beneficiary_name'      => 'Peter Parker',
+            'beneficiary_account'   => '1213141516',
+            'bank'                  => 'Bank Central Asia ( BCA )',
+            'reference_no'          => '83hgf882',
+            'notes'                 => 'just for fun',
+            'status'                => 'queued',
+            'created_by'            => 'John Doe',
+            'created_at'            => '2022-03-29T00:00:00Z',
+            'updated_at'            => '2022-03-29T00:00:00Z'
         ];
 
         $service = $this->createMockService([

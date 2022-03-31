@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace Timedoor\TmdMidtransIris;
 
 use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
-use Timedoor\TmdMidtransIris\Api\ApiClient;
 use Timedoor\TmdMidtransIris\Beneficiary;
+use Timedoor\TmdMidtransIris\Exception\BadRequestException;
 use Timedoor\TmdMidtransIris\Models\Beneficiary as BeneficiaryModel;
 use Timedoor\TmdMidtransIris\Utils\Arr;
 use Timedoor\TmdMidtransIris\Utils\Env;
@@ -18,31 +16,18 @@ use Timedoor\TmdMidtransIris\Utils\Json;
 
 class BeneficiaryTest extends BaseTestCase
 {
+    protected $service = Beneficiary::class;
+
     public function setUp(): void
     {
         Config::$apiKey         = Env::get('API_KEY');
         Config::$merchantKey    = Env::get('MERCHANT_KEY');
     }
 
-    /**
-     * Create mock service
-     *
-     * @param   array       $responses
-     * @return  Beneficiary
-     */
-    protected function createMockService(array $responses = [])
+    public static function tearDownAfterClass(): void
     {
-        $opts = [];
-
-        if (count($responses) > 0 && !$this->isMockingDisabled()) {
-            $opts['handler'] = HandlerStack::create(
-                new MockHandler($responses)
-            );
-        }
-
-        return new Beneficiary(
-            new ApiClient($opts)
-        );
+        Config::$apiKey         = null;
+        Config::$merchantKey    = null;
     }
 
     public function testGetListBeneficiaries()
@@ -137,36 +122,33 @@ class BeneficiaryTest extends BaseTestCase
         $beneficiary = (new BeneficiaryModel)
                         ->setName('John Doe')
                         ->setBank('danamon')
-                        ->setAccount('1234567890')
+                        ->setAccount('abc')
                         ->setAliasName('johndanamon')
                         ->setEmail('john@danamnoexample.com');
 
-        $successBody    = ['status' => 'created'];
-        $errorBody      = [
+        $expect = [
             'error_message' => 'An error occurred when creating beneficiary',
-            'errors'        => [
-                'Account has already been taken',
-                'Alias name has already been taken'
+            'errors' => [
+                'Account is too short (minimum is 6 characters)',
+                'Account is not a number'
             ]
         ];
 
         $service = $this->createMockService([
-            new Response(201, [], Json::encode($successBody)),
             new RequestException(
                 'something went wrong',
                 new Request('POST', 'test'),
-                new Response(400, [], Json::encode($errorBody))
+                new Response(400, [], Json::encode($expect))
             ),
         ]);
 
-        $firstResp  = $service->create($beneficiary);
-        $secondResp = $service->create($beneficiary);
-
-        $this->assertEquals($firstResp->getCode(), 201);
-        $this->assertEquals($successBody, $firstResp->getBody());
-
-        $this->assertEquals($secondResp->getCode(), 400);
-        $this->assertEquals($errorBody, $secondResp->getBody());
+        try {
+            $service->create($beneficiary);
+        } catch (BadRequestException $e) {
+            $this->assertEquals(400, $e->getCode());
+            $this->assertEquals($expect['error_message'], $e->getMessage());
+            $this->assertEquals($expect['errors'], $e->getErrors());
+        }
     }
 
     public function testExceptionHandlingUpdateBeneficiary()
@@ -175,10 +157,10 @@ class BeneficiaryTest extends BaseTestCase
                         ->setName('John Doe')
                         ->setBank('danamon')
                         ->setAccount('1234567890')
-                        ->setAliasName('johndanamon')
+                        ->setAliasName('anonymous')
                         ->setEmail('john@danamnoexample.com');
 
-        $body = [
+        $expect = [
             'error_message' => 'An error occurred when updating beneficiary',
             'errors'        => 'Could not find saved beneficiary'
         ];
@@ -187,45 +169,18 @@ class BeneficiaryTest extends BaseTestCase
             new RequestException(
                 'something went wrong',
                 new Request('PATCH', 'test'),
-                new Response(404, [], Json::encode($body))
+                new Response(404, [], Json::encode($expect))
             )
         ]);
 
-        $response = $service->update(
-            $beneficiary->getAliasName(), $beneficiary->setName('Jane Doe')
-        );
-
-        $this->assertArrayHasKey('errors', $response->getBody());
-        $this->assertArrayHasKey('error_message', $response->getBody());
-        $this->assertEquals($body, $response->getBody());
-        $this->assertEquals(404, $response->getCode());
-
-        $body = [
-            'error_message' => 'An error occurred when updating beneficiary',
-            'errors' => [
-                'Bank is not included in the list'
-            ],
-        ];
-
-        $service = $this->createMockService([
-            new Response(201, [], Json::encode(['status' => 'created'])),
-            new RequestException(
-                'something went wrong',
-                new Request('PATCH', 'test'),
-                new Response(400, [], Json::encode($body))
-            )
-        ]);
-
-        $createResponse = $service->create($beneficiary);
-
-        $this->assertEquals(201, $createResponse->getCode());
-        $this->assertEquals(['status' => 'created'], $createResponse->getBody());
-
-        $response = $service->update(
-            $beneficiary->getAliasName(), $beneficiary->setBank('example_bank')
-        );
-
-        $this->assertEquals(400, $response->getCode());
-        $this->assertEquals($body, $response->getBody());
+        try {
+            $service->update(
+                $beneficiary->getAliasName(), $beneficiary->setName('Jane Doe')
+            );
+        } catch (BadRequestException $e) {
+            $this->assertEquals(404, $e->getCode());
+            $this->assertEquals($expect['error_message'], $e->getMessage());
+            $this->assertEquals($expect['errors'], $e->getErrors());
+        }
     }
 }
