@@ -10,111 +10,83 @@ use GuzzleHttp\Psr7\Response;
 use Timedoor\TmdMidtransIris\Beneficiary;
 use Timedoor\TmdMidtransIris\Exception\BadRequestException;
 use Timedoor\TmdMidtransIris\Models\Beneficiary as BeneficiaryModel;
-use Timedoor\TmdMidtransIris\Utils\Arr;
-use Timedoor\TmdMidtransIris\Utils\Env;
 use Timedoor\TmdMidtransIris\Utils\Json;
 
 class BeneficiaryTest extends BaseTestCase
 {
     protected $service = Beneficiary::class;
 
-    public function setUp(): void
-    {
-        Config::$apiKey         = Env::get('API_KEY');
-        Config::$merchantKey    = Env::get('MERCHANT_KEY');
-    }
-
-    public static function tearDownAfterClass(): void
-    {
-        Config::$apiKey         = null;
-        Config::$merchantKey    = null;
-    }
-
     public function testGetListBeneficiaries()
     {
-        $data = [
-            [
-                "name"          => "John Doe",
-                "bank"          => "danamon",
-                "account"       => "1234567890",
-                "alias_name"    => "johndanamon",
-                "email"         => "john@danamnoexample.com"
-            ],
-            [
-                "name"          => "Mary Jane",
-                "bank"          => "mandiri",
-                "account"       => "1232133213",
-                "alias_name"    => "marymandiri1",
-                "email"         => "mary@mandiriexample.com"
-            ]
+        $beneficiaries = [
+            (new BeneficiaryModel)
+                ->setName('Mary Jane')
+                ->setBank('mandiri')
+                ->setAccount('1313131313')
+                ->setAliasName('maryjane1')
+                ->setEmail('mary.jane1@example.com')
         ];
 
-        $beneficiaries = [];
+        $createExpect   = ['status' => 'created'];
+        $service        = $this->createMockService([
+                            new Response(201, [], Json::encode($createExpect)),
+                            new Response(200, [], Json::encode($beneficiaries)),
+                        ]);
 
-        foreach ($data as $item) {
-            $item               = new Arr($item);
-            $beneficiaries[]    = (new BeneficiaryModel)
-                                    ->setName($item->get('name'))
-                                    ->setBank($item->get('bank'))
-                                    ->setAccount($item->get('account'))
-                                    ->setAliasName($item->get('alias'))
-                                    ->setEmail($item->get('email'));
-        }
-
-        $service = $this->createMockService([
-            new Response(200, [], Json::encode($data)),
-        ]);
+        $this->assertEquals($createExpect, $service->create($beneficiaries[0]));
 
         $response = $service->all();
 
-        $this->assertCount(2, $response);
-        $this->assertEquals($beneficiaries, $response);
+        if (!$this->isMockingDisabled()) {
+            $this->assertCount(1, $response);
+        }
+        
+        foreach ($response as $beneficiary) {
+            $this->assertInstanceOf(BeneficiaryModel::class, $beneficiary);
+        }
     }
 
     public function testCreateBeneficiary()
     {
         $beneficiary = (new BeneficiaryModel)
-                        ->setName('John Doe')
-                        ->setBank('danamon')
+                        ->setName('Mary Jane 2')
+                        ->setBank('bca')
                         ->setAccount('1234567890')
-                        ->setAliasName('johndanamon')
-                        ->setEmail('john@danamnoexample.com');
+                        ->setAliasName('maryjane2')
+                        ->setEmail('mary.jane2@example.com');
                         
-        $service = $this->createMockService([
-            new Response(201, [], Json::encode(['status' => 'created']))
-        ]);
+        $expect     = ['status' => 'created'];
+        $service    = $this->createMockService([
+                        new Response(201, [], Json::encode($expect))
+                    ]);
 
-        $response = $service->create($beneficiary);
-
-        $this->assertArrayHasKey('status', $response->getBody());
-        $this->assertEquals(201, $response->getCode());
+        $this->assertEquals($expect, $service->create($beneficiary));
     }
 
     public function testUpdateBeneficiary()
     {
          $beneficiary = (new BeneficiaryModel)
-                        ->setName('John Doe')
-                        ->setBank('danamon')
-                        ->setAccount('1234567890')
-                        ->setAliasName('johndanamon')
-                        ->setEmail('john@danamnoexample.com');
+                        ->setName('Mary jane 3')
+                        ->setBank('bni')
+                        ->setAccount('141414141414')
+                        ->setAliasName('maryjane3')
+                        ->setEmail('mary.jane3@example.com');
+
+        $createExpect = ['status' => 'created'];
+        $updateExpect = ['status' => 'updated'];
 
         $service = $this->createMockService([
-            new Response(201, [], Json::encode(['status' => 'created'])),
-            new Response(200, [], Json::encode(['status' => 'updated'])),
+            new Response(201, [], Json::encode($createExpect)),
+            new Response(200, [], Json::encode($updateExpect)),
         ]);
 
-        $createResponse = $service->create($beneficiary);
-
-        $this->assertEquals(['status' => 'created'], $createResponse->getBody());
-        $this->assertEquals(201, $createResponse->getCode());
-
-        $response = $service->update(
-            $beneficiary->getAliasName(), $beneficiary->setName('Jane Doe')
+        $this->assertEquals($createExpect, $service->create($beneficiary));
+        $this->assertEquals(
+            $updateExpect,
+            $service->update(
+                $beneficiary->getAliasName(), $beneficiary->setName('Jane Doe')
+            )
         );
-
-        $this->assertEquals(['status' => 'updated'], $response->getBody());
-        $this->assertEquals(200, $response->getCode());
     }
 
     public function testExceptionHandlingCreateBeneficiary()

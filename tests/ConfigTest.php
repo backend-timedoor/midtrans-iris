@@ -31,12 +31,26 @@ class ConfigTest extends TestCase
 
     public function testEncodeAuthorizationKey()
     {
-        Config::$apiKey = 'abcdef';
-        $authkey = Config::getAuthorizationKey();
-        $decoded = base64_decode($authkey);
+        Config::$approverApiKey = 'abcdef';
+        Config::$creatorApiKey  = 'ghijkl';
 
-        // auth key should contain a semicolon (:) at the end
-        $this->assertEquals(strlen($decoded) - 1, strpos($decoded, ':'));
-        $this->assertCount(2, explode(':', $decoded));
+        $this->assertEquals(
+            base64_encode(sprintf('%s:', Config::$approverApiKey)),
+            Config::getAuthorizationKey(Actor::APPROVER)
+        );
+
+        $this->assertEquals(
+            base64_encode(sprintf('%s:', Config::$creatorApiKey)),
+            Config::getAuthorizationKey(Actor::CREATOR)
+        );
+
+        $approver   = base64_decode(Config::getAuthorizationKey(Actor::APPROVER));
+        $creator    = base64_decode(Config::getAuthorizationKey(Actor::CREATOR));
+
+        $this->assertEquals(strlen($approver) - 1, strpos($approver, ':'));
+        $this->assertCount(2, explode(':', $approver));
+
+        $this->assertEquals(strlen($creator) - 1, strpos($creator, ':'));
+        $this->assertCount(2, explode(':', $creator));
     }
 }
