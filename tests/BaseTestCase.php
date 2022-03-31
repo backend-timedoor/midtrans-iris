@@ -2,11 +2,21 @@
 
 namespace Timedoor\TmdMidtransIris;
 
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
 use PHPUnit\Framework\TestCase;
+use Timedoor\TmdMidtransIris\Api\ApiClient;
 use Timedoor\TmdMidtransIris\Utils\Env;
 
-class BaseTestCase extends TestCase
+abstract class BaseTestCase extends TestCase
 {
+    /**
+     * The service class
+     *
+     * @var mixed
+     */
+    protected $service;
+
     /**
      * Determine wether the mocking are disabled or not
      *
@@ -35,5 +45,27 @@ class BaseTestCase extends TestCase
     public function enableMocking()
     {
         Env::set('DISABLE_MOCKING', false);
+    }
+
+    /**
+     * Create mock service
+     *
+     * @param   array   $handlers
+     * @return  mixed
+     */
+    protected function createMockService(array $handlers = [])
+    {
+        $opts = [];
+
+        if (count($handlers) > 0 && !$this->isMockingDisabled()) {
+            $opts['handler'] = HandlerStack::create(
+                new MockHandler($handlers)
+            );
+        }
+
+        $client     = new ApiClient($opts);
+        $service    = $this->service;
+
+        return new $service($client);
     }
 }
