@@ -12,11 +12,18 @@ class Config
     public static $merchantKey;
 
     /**
-     * The api key
+     * The "approver" api key
      *
      * @var string
      */
-    public static $apiKey;
+    public static $approverApiKey;
+
+    /**
+     * The "creator" api key
+     *
+     * @var string
+     */
+    public static $creatorApiKey;
 
     /**
      * Environment should be production or sandbox
@@ -58,8 +65,14 @@ class Config
      *
      * @return string
      */
-    public static function getAuthorizationKey()
+    public static function getAuthorizationKey($actor = Actor::CREATOR)
     {
-        return base64_encode(sprintf('%s:', static::$apiKey));
+        $apiKey = static::$creatorApiKey;
+
+        if ($actor == Actor::APPROVER) {
+            $apiKey = static::$approverApiKey;
+        }
+
+        return base64_encode(sprintf('%s:', $apiKey));
     }
 }

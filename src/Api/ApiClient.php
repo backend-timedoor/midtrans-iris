@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\RequestException;
 use JsonSerializable;
+use Timedoor\TmdMidtransIris\Actor;
 use Timedoor\TmdMidtransIris\Config;
 use Timedoor\TmdMidtransIris\Utils\Json;
 use Timedoor\TmdMidtransIris\Utils\Str;
@@ -20,12 +21,21 @@ class ApiClient implements IApiClient
     private $httpClient;
 
     /**
+     * The actor that is going to make the request
+     *
+     * @var string
+     */
+    private $actor = Actor::CREATOR;
+
+    /**
      * The Iris Api base path
      */
     private const API_BASE_PATH = '/api/v1';
     
-    public function __construct($options = [])
+    public function __construct($options = [], $actor = Actor::CREATOR)
     {
+        $this->actor = $actor;
+
         if (is_null($this->httpClient)) {
             $this->httpClient = $this->newHttpClient($options);
         } 
@@ -96,7 +106,7 @@ class ApiClient implements IApiClient
      */
     public function call($method, $path, ?JsonSerializable $body = null, $headers = [], $query = [])
     {
-        $options    = self::buildHttpConfiguration($method, $body, $headers, $query);
+        $options    = $this->buildHttpConfiguration($method, $body, $headers, $query);
         $uri        = sprintf('iris/%s/%s', trim(static::API_BASE_PATH, '/'), trim($path, '/'));
 
         try {
@@ -128,10 +138,10 @@ class ApiClient implements IApiClient
         }
     }
 
-    public static function buildHttpConfiguration($method, ?JsonSerializable $body = null, $headers = [], $query = [])
+    public function buildHttpConfiguration($method, ?JsonSerializable $body = null, $headers = [], $query = [])
     {
         $headers = array_merge($headers, [
-            'Authorization' => sprintf('Basic %s', Config::getAuthorizationKey()),
+            'Authorization' => sprintf('Basic %s', Config::getAuthorizationKey($this->actor)),
             'Accept'        => 'application/json' 
         ]);
 

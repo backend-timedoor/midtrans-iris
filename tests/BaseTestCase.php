@@ -47,13 +47,27 @@ abstract class BaseTestCase extends TestCase
         Env::set('DISABLE_MOCKING', false);
     }
 
+    protected function setUp(): void
+    {
+        Config::$approverApiKey = Env::get('APPROVER_API_KEY');
+        Config::$creatorApiKey  = Env::get('CREATOR_API_KEY');
+        Config::$merchantKey    = Env::get('MERCHANT_KEY');
+    }
+
+    protected function tearDown(): void
+    {
+        Config::$approverApiKey = null;
+        Config::$creatorApiKey  = null;
+        Config::$merchantKey    = null;
+    }
+
     /**
      * Create mock service
      *
      * @param   array   $handlers
      * @return  mixed
      */
-    protected function createMockService(array $handlers = [])
+    protected function createMockService(array $handlers = [], $actor = Actor::CREATOR)
     {
         $opts = [];
 
@@ -63,7 +77,7 @@ abstract class BaseTestCase extends TestCase
             );
         }
 
-        $client     = new ApiClient($opts);
+        $client     = new ApiClient($opts, $actor);
         $service    = $this->service;
 
         return new $service($client);
