@@ -5,41 +5,24 @@ namespace Timedoor\TmdMidtransIris;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
-use Timedoor\TmdMidtransIris\Config;
+use Timedoor\TmdMidtransIris\Dto\PayoutNotification;
 use Timedoor\TmdMidtransIris\Dto\PayoutRequest;
 use Timedoor\TmdMidtransIris\Exception\BadRequestException;
 use Timedoor\TmdMidtransIris\Payout;
+use Timedoor\TmdMidtransIris\Models\Payout as PayoutModel;
 use Timedoor\TmdMidtransIris\Utils\Env;
 use Timedoor\TmdMidtransIris\Utils\Json;
 
 class PayoutTest extends BaseTestCase
 {
-    protected $service = Payout::class;
-
-    protected function setUp(): void
-    {
-        Config::$apiKey         = Env::get('API_KEY');
-        Config::$merchantKey    = Env::get('MERCHANT_KEY');
-    }
-
-    public static function tearDownAfterClass(): void
-    {
-        Config::$apiKey         = null;
-        Config::$merchantKey    = null;
-    }
+    protected $service  = Payout::class;
 
     public function testCreatePayout()
     {
         $body = [
             'payouts' => [
-                [
-                    'status'          => 'queued',
-                    'reference_no'    => '1d4f8423393005'
-                ],
-                [
-                    'status'          => 'queued',
-                    'reference_no'    => '10438f2b393005'
-                ]
+                (new PayoutModel)->setStatus(PayoutStatus::QUEUED)->setRefNo('1d4f8423393005'),
+                (new PayoutModel)->setStatus(PayoutStatus::QUEUED)->setRefNo('10438f2b393005')
             ]
         ];
 
@@ -64,14 +47,16 @@ class PayoutTest extends BaseTestCase
 
         $response = $service->create($payouts);
 
-        $this->assertEquals(201, $response->getCode());
-    
         if (!$this->isMockingDisabled()) {
-            $this->assertEquals($body, $response->getBody());
+            foreach ($body['payouts'] as $key => $item) {
+                $this->assertEquals($item->getRefNo(), $response[$key]->getRefNo());
+                $this->assertEquals($item->getStatus(), $response[$key]->getStatus());
+            }
         } else {
-            foreach ($response->getBody()['payouts'] as $payout) {
-                $this->assertArrayHasKey('status', $payout);
-                $this->assertArrayHasKey('reference_no', $payout);
+            $this->assertIsArray($response);
+
+            foreach ($response as $payout) {
+                $this->assertInstanceOf(PayoutModel::class, $payout);
             }
         }
     }
@@ -128,7 +113,7 @@ class PayoutTest extends BaseTestCase
                 new Response(400, [], Json::encode($errorExpect))
             ),
             new Response(202, [], Json::encode($successExpect))
-        ]);
+        ], Actor::APPROVER);
 
         try {
             $service->approve(['10438f2b393005']);
@@ -138,10 +123,25 @@ class PayoutTest extends BaseTestCase
             $this->assertEquals($errorExpect['errors'], $e->getErrors());
         }
 
-        $response = $service->approve(['wfe8ck5z85bdxb21ts'], '540067');
+        // this is just a dummy otp code
+        $otp = '540067';
 
-        $this->assertEquals(202, $response->getCode());
-        $this->assertEquals($successExpect, $response->getBody());
+        // for integration test on "approval" you need an actual otp
+        // for more information, see: https://iris-docs.midtrans.com/#approve-payouts
+        if ($this->isMockingDisabled()) {
+            // if you run the integration test but don't specify the OTP, then it will fail
+            if (!Env::has('OTP')) {
+                $this->expectException(BadRequestException::class);
+                $this->expectExceptionMessage($errorExpect['error_message']);
+            }
+
+            $otp = Env::get('OTP');
+        }
+
+        $dummyPayout    = $this->createDummyPayout()[0];
+        $response       = $service->approve([$dummyPayout->getRefNo()], $otp);
+
+        $this->assertEquals($successExpect, $response);
     }
 
     public function testRejectPayout()
@@ -162,7 +162,7 @@ class PayoutTest extends BaseTestCase
                 new Response(400, [], Json::encode($errorExpect))
             ),
             new Response(202, [], Json::encode($successExpect))
-        ]);
+        ], Actor::APPROVER);
 
         try {
             $service->reject(['10438f2b393005'], 'reject test payout');
@@ -172,10 +172,10 @@ class PayoutTest extends BaseTestCase
             $this->assertEquals($errorExpect['errors'], $e->getErrors());
         }
 
-        $response = $service->reject(['f8ecexm43dads2am4n'], 'invalid payout amount');
+        $dummyPayout    = $this->createDummyPayout()[0];
+        $response       = $service->reject([$dummyPayout->getRefNo()], 'invalid payout amount');
 
-        $this->assertEquals(202, $response->getCode());
-        $this->assertEquals($successExpect, $response->getBody());
+        $this->assertEquals($successExpect, $response);
     }
 
     public function testGetPayoutDetails()
@@ -184,6 +184,7 @@ class PayoutTest extends BaseTestCase
             'amount'                => '200000.00',
             'beneficiary_name'      => 'Peter Parker',
             'beneficiary_account'   => '1213141516',
+            'beneficiary_email'     => 'peter@example.com',
             'bank'                  => 'Bank Central Asia ( BCA )',
             'reference_no'          => '83hgf882',
             'notes'                 => 'just for fun',
@@ -197,16 +198,66 @@ class PayoutTest extends BaseTestCase
             new Response(200, [], Json::encode($expect))
         ]);
 
-        $response = $service->get('ke1zd3rez12zk0nxmb');
+        $dummyPayout    = $this->createDummyPayout()[0];
+        $response       = $service->get($dummyPayout->getRefNo());
 
-        $this->assertEquals(200, $response->getCode());
-        
         if (!$this->isMockingDisabled()) {
-            $this->assertEquals($expect, $response->getBody());
+            $this->assertEquals($expect, $response->jsonSerialize());
         } else {
-            foreach (array_keys($expect) as $field) {
-                $this->assertArrayHasKey($field, $response->getBody());
-            }
+            $this->assertInstanceOf(PayoutModel::class, $response);
         }
+    }
+
+    public function testValidateNotification()
+    {
+        $notification = (new PayoutNotification)
+                            ->setRefNo('21b6d59f9414b2636b')
+                            ->setAmount('10000')
+                            ->setStatus(PayoutStatus::FAILED)
+                            ->setUpdatedAt('2022-03-31T11:38:12Z')
+                            ->setErrorCode('002')
+                            ->setErrorMsg('Invalid destination account number');
+
+        $service    = $this->createMockService();
+        $actualSig  = $service->createNotificationSignature($notification);
+
+        $this->assertTrue($service->validateNotification($actualSig, $notification));
+        $this->assertFalse($service->validateNotification('abc', $notification));
+
+        $this->assertFalse(
+            $service->validateNotification($actualSig, $notification->setAmount('5000'))
+        );
+    }
+
+    protected function createDummyPayout()
+    {
+        $payout = (new PayoutModel)
+                    ->setAmount(random_int(10000, 50000))
+                    ->setBeneficiaryName('Peter Parker')
+                    ->setBeneficiaryAccount('1213141516')
+                    ->setBeneficiaryEmail('peter.parker@example.com')
+                    ->setBank('Bank Central Asia (BCA)')
+                    ->setRefNo('kkkjp25fv2gs2fgfa0')
+                    ->setNotes('just a dummy payout')
+                    ->setStatus(PayoutStatus::QUEUED)
+                    ->setCreatedAt('Administrator')
+                    ->setCreatedAt('2022-03-29T00:00:00Z')
+                    ->setUpdatedAt('2022-03-29T00:00:00Z');
+
+        $service = $this->createMockService([
+            new Response(201, [], Json::encode([
+                'payouts' => [$payout]
+            ]))
+        ]);
+
+        return $service->create([
+                (new PayoutRequest)
+                    ->setBeneficiaryName('Test Beneficiary')
+                    ->setBeneficiaryAccount('1414141414')
+                    ->setBeneficiaryEmail('beneficiary.test@example.com')
+                    ->setBeneficiaryBank('bca')
+                    ->setAmount(random_int(10000, 50000))
+                    ->setNotes('just a dummy payout')
+        ]);
     }
 }
