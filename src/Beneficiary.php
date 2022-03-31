@@ -2,31 +2,18 @@
 
 namespace Timedoor\TmdMidtransIris;
 
-use Timedoor\TmdMidtransIris\Api\ApiResponse;
-use Timedoor\TmdMidtransIris\Api\IApiClient;
 use Timedoor\TmdMidtransIris\Models\Beneficiary as BeneficiaryModel;
 use Timedoor\TmdMidtransIris\Utils\Arr;
 use Timedoor\TmdMidtransIris\Utils\ConvertException;
 
-class Beneficiary
+class Beneficiary extends BaseService
 {
-    /**
-     * Api Client
-     *
-     * @var IApiClient
-     */
-    private $apiClient;
-
-    public function __construct(IApiClient $apiClient)
-    {
-        $this->apiClient = $apiClient; 
-    }
-
     /**
      * Create a new beneficiary account
      *
      * @param   BeneficiaryModel $data
-     * @return  ApiResponse
+     * @throws  UnauthorizedRequestException|BadRequestException
+     * @return  array
      */
     public function create(BeneficiaryModel $data)
     {
@@ -34,7 +21,7 @@ class Beneficiary
 
         ConvertException::fromResponse($response);
     
-        return $response;
+        return $response->getBody();
     }
 
     /**
@@ -42,7 +29,8 @@ class Beneficiary
      *
      * @param   string              $alias
      * @param   BeneficiaryModel    $data
-     * @return  ApiResponse
+     * @throws  UnauthorizedRequestException|BadRequestException
+     * @return  array
      */
     public function update($alias, BeneficiaryModel $data)
     {
@@ -50,13 +38,13 @@ class Beneficiary
 
         ConvertException::fromResponse($response);
 
-        return $response;
+        return $response->getBody();
     }
 
     /**
      * Get list of beneficiaries
-     *
-     * @return Beneficiary[]
+     * @throws  UnauthorizedRequestException
+     * @return  Beneficiary[]
      */
     public function all()
     {
@@ -78,29 +66,5 @@ class Beneficiary
         } 
 
         return $result;
-    }
-
-    /**
-     * Get api Client
-     *
-     * @return  IApiClient
-     */ 
-    public function getApiClient()
-    {
-        return $this->apiClient;
-    }
-
-    /**
-     * Set api Client
-     *
-     * @param  IApiClient  $apiClient  Api Client
-     *
-     * @return  self
-     */ 
-    public function setApiClient(IApiClient $apiClient)
-    {
-        $this->apiClient = $apiClient;
-
-        return $this;
     }
 }
