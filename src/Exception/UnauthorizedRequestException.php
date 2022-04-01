@@ -6,12 +6,26 @@ use Exception;
 
 class UnauthorizedRequestException extends Exception
 {
-    public function __construct(?string $message = "")
+    protected $errors;
+
+    public function __construct(?string $message = "", $errors = [])
     {
+        $this->errors = $errors;
+
         parent::__construct(
             is_null($message) ? 'Please check your API or Merchant key' : $message,
             401,
             null
         );
+    }
+
+    /**
+     * Get the error details
+     *
+     * @return string|array
+     */
+    public function getErrors()
+    {
+        return $this->errors; 
     }
 }
