@@ -4,7 +4,9 @@ namespace Timedoor\TmdMidtransIris;
 
 use Timedoor\TmdMidtransIris\Exception\BadRequestException;
 use Timedoor\TmdMidtransIris\Exception\UnauthorizedRequestException;
+use Timedoor\TmdMidtransIris\Models\Bank;
 use Timedoor\TmdMidtransIris\Models\BankAccount as BankAccountModel;
+use Timedoor\TmdMidtransIris\Models\BankAccountValidated;
 use Timedoor\TmdMidtransIris\Utils\Arr;
 use Timedoor\TmdMidtransIris\Utils\ConvertException;
 
@@ -69,7 +71,7 @@ class BankAccount extends BaseService
         
         ConvertException::fromResponse($response);
 
-        $body   = $response->getBody();
+        $body   = $response->getBody()['beneficiary_banks'];
         $result = [];
 
         if (is_array($body)) {
@@ -90,7 +92,7 @@ class BankAccount extends BaseService
      * @param   string $bankCode
      * @param   string $accountNumber
      * @throws  UnauthorizedRequestException|BadRequestException
-     * @return  BankAccountModel
+     * @return  BankAccountValidated
      */
     public function validate(string $bankCode, string $accountNumber)
     {
@@ -103,10 +105,10 @@ class BankAccount extends BaseService
 
         $body = new Arr($response->getBody());
 
-        return (new BankAccountModel)
+        return (new BankAccountValidated)
                 ->setId($body->get('id'))
                 ->setAccountName($body->get('account_name'))
-                ->setAccountNumber($body->get('account_no'))
+                ->setaccountNo($body->get('account_no'))
                 ->setBankName($body->get('bank_name'));
     }
 }

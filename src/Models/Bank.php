@@ -1,6 +1,6 @@
 <?php
 
-namespace Timedoor\TmdMidtransIris;
+namespace Timedoor\TmdMidtransIris\Models;
 
 use JsonSerializable;
 
