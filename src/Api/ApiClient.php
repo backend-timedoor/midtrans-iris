@@ -4,6 +4,7 @@ namespace Timedoor\TmdMidtransIris\Api;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use JsonSerializable;
 use Timedoor\TmdMidtransIris\Actor;
@@ -135,6 +136,8 @@ class ApiClient implements IApiClient
                 $response->getReasonPhrase(),
                 Json::decode($response->getBody()->getContents())
             );
+        } catch (ConnectException $e) {
+            return new ApiResponse($e->getCode(), $e->getMessage());
         }
     }
 
