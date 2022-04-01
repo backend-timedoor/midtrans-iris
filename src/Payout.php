@@ -9,7 +9,7 @@ use Timedoor\TmdMidtransIris\Dto\PlainRequest;
 use Timedoor\TmdMidtransIris\Exception\BadRequestException;
 use Timedoor\TmdMidtransIris\Exception\UnauthorizedRequestException;
 use Timedoor\TmdMidtransIris\Models\Payout as PayoutModel;
-use Timedoor\TmdMidtransIris\Utils\Arr;
+use Timedoor\TmdMidtransIris\Utils\Map;
 use Timedoor\TmdMidtransIris\Utils\ConvertException;
 use Timedoor\TmdMidtransIris\Utils\Json;
 
@@ -40,7 +40,7 @@ class Payout extends BaseService
         $result = [];
 
         foreach ($body['payouts'] as $item) {
-            $item       = new Arr($item);
+            $item       = new Map($item);
             $result[]   = (new PayoutModel)
                             ->setRefNo($item->get('reference_no'))
                             ->setStatus($item->get('status'));
@@ -108,7 +108,7 @@ class Payout extends BaseService
 
         ConvertException::fromResponse($response);
 
-        $body   = new Arr($response->getBody());
+        $body   = new Map($response->getBody());
         $result = (new PayoutModel)
                     ->setAmount($body->get('amount'))
                     ->setBeneficiaryName($body->get('beneficiary_name'))

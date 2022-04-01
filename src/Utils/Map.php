@@ -2,10 +2,10 @@
 
 namespace Timedoor\TmdMidtransIris\Utils;
 
-class Arr
+class Map
 {
     /**
-     * Array of attributes
+     * Map of attributes
      *
      * @var array
      */

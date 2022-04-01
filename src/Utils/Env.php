@@ -2,7 +2,7 @@
 
 namespace Timedoor\TmdMidtransIris\Utils;
 
-use Timedoor\TmdMidtransIris\Utils\Arr;
+use Timedoor\TmdMidtransIris\Utils\Map;
 
 class Env
 {
@@ -44,10 +44,10 @@ class Env
     /**
      * Get all environment variables
      *
-     * @return Arr
+     * @return Map
      */
     public static function vars()
     {
-        return new Arr(getenv()); 
+        return new Map(getenv()); 
     }
 }

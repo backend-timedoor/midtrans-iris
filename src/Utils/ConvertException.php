@@ -18,7 +18,7 @@ class ConvertException
     {
         if ($resp->isError()) {
             if ($resp->getCode() == 401) {
-                $body       = new Arr($resp->getBody());
+                $body       = new Map($resp->getBody());
                 $errorMsg   = $body->get('error_message');
 
                 throw new UnauthorizedRequestException(
@@ -26,7 +26,7 @@ class ConvertException
                     $body->get('errors')
                 );
             } else if (($resp->getCode() == 400) || ($resp->getCode() == 404)) {
-                $body       = new Arr($resp->getBody());
+                $body       = new Map($resp->getBody());
                 $errorMsg   = !is_null($body->get('error_message'))
                                 ? $body->get('error_message')
                                 : $resp->getErrors();

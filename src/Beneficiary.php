@@ -3,7 +3,7 @@
 namespace Timedoor\TmdMidtransIris;
 
 use Timedoor\TmdMidtransIris\Models\Beneficiary as BeneficiaryModel;
-use Timedoor\TmdMidtransIris\Utils\Arr;
+use Timedoor\TmdMidtransIris\Utils\Map;
 use Timedoor\TmdMidtransIris\Utils\ConvertException;
 
 class Beneficiary extends BaseService
@@ -56,7 +56,7 @@ class Beneficiary extends BaseService
         $result = [];
 
         foreach ($body as $item) {
-            $item       = new Arr($item);
+            $item       = new Map($item);
             $result[]   = (new BeneficiaryModel)
                             ->setName($item->get('name'))
                             ->setBank($item->get('bank'))

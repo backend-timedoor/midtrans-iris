@@ -7,7 +7,7 @@ use Timedoor\TmdMidtransIris\Exception\UnauthorizedRequestException;
 use Timedoor\TmdMidtransIris\Models\Bank;
 use Timedoor\TmdMidtransIris\Models\BankAccount as BankAccountModel;
 use Timedoor\TmdMidtransIris\Models\BankAccountValidated;
-use Timedoor\TmdMidtransIris\Utils\Arr;
+use Timedoor\TmdMidtransIris\Utils\Map;
 use Timedoor\TmdMidtransIris\Utils\ConvertException;
 
 class BankAccount extends BaseService
@@ -28,7 +28,7 @@ class BankAccount extends BaseService
 
         if (is_array($body)) {
             foreach ($body as $item) {
-                $item       = new Arr($item);
+                $item       = new Map($item);
                 $result[]   = (new BankAccountModel)
                                 ->setId($item->get('bank_account_id'))
                                 ->setBankName($item->get('bank_name'))
@@ -54,7 +54,7 @@ class BankAccount extends BaseService
 
         ConvertException::fromResponse($response);
         
-        $body = new Arr($response->getBody());
+        $body = new Map($response->getBody());
         
         return $body->get('balance', 0);
     }
@@ -76,7 +76,7 @@ class BankAccount extends BaseService
 
         if (is_array($body)) {
             foreach ($body as $item) {
-                $item       = new Arr($item);
+                $item       = new Map($item);
                 $result[]   = (new Bank)
                                 ->setCode($item->get('code'))
                                 ->setName($item->get('name'));
@@ -103,7 +103,7 @@ class BankAccount extends BaseService
 
         ConvertException::fromResponse($response);
 
-        $body = new Arr($response->getBody());
+        $body = new Map($response->getBody());
 
         return (new BankAccountValidated)
                 ->setId($body->get('id'))
