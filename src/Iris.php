@@ -2,10 +2,12 @@
 
 namespace Timedoor\TmdMidtransIris;
 
+use InvalidArgumentException;
 use Timedoor\TmdMidtransIris\Api\ApiClient;
 use Timedoor\TmdMidtransIris\Api\IApiClient;
 use Timedoor\TmdMidtransIris\BankAccount;
 use Timedoor\TmdMidtransIris\Payout;
+use Timedoor\TmdMidtransIris\Utils\Map;
 
 class Iris
 {
@@ -37,8 +39,12 @@ class Iris
      */
     private $_bankAccount;
 
-    public function __construct()
+    public function __construct(array $config)
     {
+        $this->validateConfiguration($config);
+
+        $this->setupConfiguration($config);
+
         $this->_apiClient   = new ApiClient;
 
         $this->_beneficiary = new Beneficiary($this->_apiClient);
@@ -88,5 +94,42 @@ class Iris
         $this->_apiClient = $_apiClient;
 
         return $this;
+    }
+
+    /**
+     * Validate the given configuration
+     *
+     * @param   array $config
+     * @throws  InvalidArgumentException
+     * @return  void
+     */
+    protected function validateConfiguration(array $config)
+    {
+        $configMap = new Map($config);
+
+        if (!$configMap->has('approver_api_key')) {
+            throw new InvalidArgumentException('approver_api_key is required');
+        }
+
+        if (!$configMap->has('creator_api_key')) {
+            throw new Invalidargumentexception('creator_api_key is required');
+        }
+
+        if (!$configMap->has('merchant_key')) {
+            throw new InvalidArgumentException('merchant_key is required');
+        }
+    }
+
+    /**
+     * Setup the given configuration
+     *
+     * @param   array $config
+     * @return  void
+     */
+    protected function setupConfiguration(array $config)
+    {
+        Config::$approverApiKey = $config['approver_api_key'];
+        Config::$creatorApiKey  = $config['creator_api_key'];
+        Config::$merchantKey    = $config['merchant_key'];
     }
 }
