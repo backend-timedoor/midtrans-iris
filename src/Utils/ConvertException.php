@@ -17,21 +17,25 @@ class ConvertException
     public static function fromResponse(ApiResponse $resp)
     {
         if ($resp->isError()) {
-            switch ($resp->getCode()) {
-                case 401:
-                    throw new UnauthorizedRequestException;
-                case 400:
-                case 404:
-                    $body       = new Arr($resp->getBody());
-                    $errorMsg   = !is_null($body->get('error_message'))
-                                    ? $body->get('error_message')
-                                    : $resp->getErrors();
+            if ($resp->getCode() == 401) {
+                $body       = new Arr($resp->getBody());
+                $errorMsg   = $body->get('error_message');
 
-                    throw new BadRequestException(
-                        $resp->getCode(),
-                        $errorMsg,
-                        $body->get('errors', [])
-                    );
+                throw new UnauthorizedRequestException(
+                    $errorMsg,
+                    $body->get('errors')
+                );
+            } else if (($resp->getCode() == 400) || ($resp->getCode() == 404)) {
+                $body       = new Arr($resp->getBody());
+                $errorMsg   = !is_null($body->get('error_message'))
+                                ? $body->get('error_message')
+                                : $resp->getErrors();
+
+                throw new BadRequestException(
+                    $resp->getCode(),
+                    $errorMsg,
+                    $body->get('errors', [])
+                );
             }
         }
     }
