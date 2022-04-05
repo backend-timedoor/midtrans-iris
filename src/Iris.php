@@ -6,7 +6,9 @@ use InvalidArgumentException;
 use Timedoor\TmdMidtransIris\Api\ApiClient;
 use Timedoor\TmdMidtransIris\Api\IApiClient;
 use Timedoor\TmdMidtransIris\BankAccount;
+use Timedoor\TmdMidtransIris\Beneficiary;
 use Timedoor\TmdMidtransIris\Payout;
+use Timedoor\TmdMidtransIris\Transaction;
 use Timedoor\TmdMidtransIris\Utils\Map;
 
 class Iris
@@ -14,30 +16,37 @@ class Iris
     /**
      * The API Client
      *
-     * @var IApiClient
+     * @var \Timedoor\TmdMidtransIris\Api\IApiClient
      */
     private $_apiClient;
 
     /**
      * Beneficiary Service
      *
-     * @var Beneficiary
+     * @var \Timedoor\TmdMidtransIris\Beneficiary
      */
     private $_beneficiary;
 
     /**
      * Payout Service
      *
-     * @var Payout
+     * @var \Timedoor\TmdMidtransIris\Payout
      */
     private $_payout;
 
     /**
      * Bank Account Service
      *
-     * @var BankAccount
+     * @var \Timedoor\TmdMidtransIris\BankAccount
      */
     private $_bankAccount;
+
+    /**
+     * Transaction Service
+     *
+     * @var \Timedoor\TmdMidtransIris\Transaction
+     */
+    private $_transaction;
 
     public function __construct(array $config)
     {
@@ -50,12 +59,13 @@ class Iris
         $this->_beneficiary = new Beneficiary($this->_apiClient);
         $this->_payout      = new Payout($this->_apiClient);
         $this->_bankAccount = new BankAccount($this->_apiClient);
+        $this->_transaction = new Transaction($this->_apiClient);
     }
 
     /**
      * Beneficiary Service
      *
-     * @return Beneficiary
+     * @return \Timedoor\TmdMidtransIris\Beneficiary
      */
     public function beneficiary()
     {
@@ -65,7 +75,7 @@ class Iris
     /**
      * Payout Service
      *
-     * @return Payout
+     * @return \Timedoor\TmdMidtransIris\Payout
      */
     public function payout()
     {
@@ -75,17 +85,27 @@ class Iris
     /**
      * Bank Account Service
      *
-     * @return BankAccount
+     * @return \Timedoor\TmdMidtransIris\BankAccount
      */
     public function bankAccount()
     {
         return $this->_bankAccount; 
     }
 
+     /**
+     * Transaction Service
+     *
+     * @return \Timedoor\TmdMidtransIris\Transaction
+     */
+    public function transaction()
+    {
+        return $this->_transaction; 
+    }
+
     /**
      * Set the API Client
      *
-     * @param  IApiClient  $_apiClient  The API Client
+     * @param  \Timedoor\TmdMidtransIris\Api\IApiClient  $_apiClient  The API Client
      *
      * @return  self
      */ 
@@ -100,7 +120,7 @@ class Iris
      * Validate the given configuration
      *
      * @param   array $config
-     * @throws  InvalidArgumentException
+     * @throws  \InvalidArgumentException
      * @return  void
      */
     protected function validateConfiguration(array $config)

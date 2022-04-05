@@ -47,5 +47,6 @@ class IrisTest extends TestCase
         $this->assertInstanceOf(Beneficiary::class, $iris->beneficiary());
         $this->assertInstanceOf(Payout::class, $iris->payout());
         $this->assertInstanceOf(BankAccount::class, $iris->bankAccount());
+        $this->assertInstanceOf(Transaction::class, $iris->transaction());
     }
 }
