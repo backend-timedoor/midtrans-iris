@@ -4,6 +4,7 @@ namespace Timedoor\TmdMidtransIris;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use Timedoor\TmdMidtransIris\Aggregator\TopUp;
 
 class IrisTest extends TestCase
 {
@@ -48,5 +49,6 @@ class IrisTest extends TestCase
         $this->assertInstanceOf(Payout::class, $iris->payout());
         $this->assertInstanceOf(BankAccount::class, $iris->bankAccount());
         $this->assertInstanceOf(Transaction::class, $iris->transaction());
+        $this->assertInstanceOf(TopUp::class, $iris->topUp());
     }
 }

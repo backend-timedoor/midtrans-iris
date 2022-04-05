@@ -3,6 +3,7 @@
 namespace Timedoor\TmdMidtransIris;
 
 use InvalidArgumentException;
+use Timedoor\TmdMidtransIris\Aggregator\TopUp;
 use Timedoor\TmdMidtransIris\Api\ApiClient;
 use Timedoor\TmdMidtransIris\Api\IApiClient;
 use Timedoor\TmdMidtransIris\BankAccount;
@@ -48,6 +49,13 @@ class Iris
      */
     private $_transaction;
 
+    /**
+     * Top-Up Service
+     *
+     * @var \Timedoor\TmdMidtransIris\Aggregator\TopUp
+     */
+    private $_topUp;
+
     public function __construct(array $config)
     {
         $this->validateConfiguration($config);
@@ -60,6 +68,7 @@ class Iris
         $this->_payout      = new Payout($this->_apiClient);
         $this->_bankAccount = new BankAccount($this->_apiClient);
         $this->_transaction = new Transaction($this->_apiClient);
+        $this->_topUp       = new TopUp($this->_apiClient);
     }
 
     /**
@@ -92,7 +101,7 @@ class Iris
         return $this->_bankAccount; 
     }
 
-     /**
+    /**
      * Transaction Service
      *
      * @return \Timedoor\TmdMidtransIris\Transaction
@@ -100,6 +109,16 @@ class Iris
     public function transaction()
     {
         return $this->_transaction; 
+    }
+
+    /**
+     * Top-Up Service
+     *
+     * @return \Timedoor\TmdMidtransIris\Aggregator\TopUp
+     */
+    public function topUp()
+    {
+        return $this->_topUp; 
     }
 
     /**
