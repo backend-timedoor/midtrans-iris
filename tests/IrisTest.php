@@ -4,6 +4,8 @@ namespace Timedoor\TmdMidtransIris;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use Timedoor\TmdMidtransIris\Aggregator\BankAccount as AggregatorBankAccount;
+use Timedoor\TmdMidtransIris\Facilitator\BankAccount as FacilitatorBankAccount;
 use Timedoor\TmdMidtransIris\Aggregator\TopUp;
 
 class IrisTest extends TestCase
@@ -47,8 +49,21 @@ class IrisTest extends TestCase
         $this->assertInstanceOf(Iris::class, $iris);
         $this->assertInstanceOf(Beneficiary::class, $iris->beneficiary());
         $this->assertInstanceOf(Payout::class, $iris->payout());
-        $this->assertInstanceOf(BankAccount::class, $iris->bankAccount());
         $this->assertInstanceOf(Transaction::class, $iris->transaction());
         $this->assertInstanceOf(TopUp::class, $iris->topUp());
+    }
+
+    public function testGetBankAccountServices()
+    {
+        $iris = new Iris([
+            'approver_api_key'  => 'abc',
+            'creator_api_key'   => 'def',
+            'merchant_key'      => 'hij'
+        ]);
+
+        $this->assertInstanceOf(BankAccount::class, $iris->bankAccount('abc'));
+        $this->assertInstanceOf(BankAccount::class, $iris->bankAccount());
+        $this->assertInstanceOf(AggregatorBankAccount::class, $iris->bankAccount(AccountType::AGGREGATOR));
+        $this->assertInstanceOf(FacilitatorBankAccount::class, $iris->bankAccount(AccountType::FACILITATOR));
     }
 }

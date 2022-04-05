@@ -3,11 +3,13 @@
 namespace Timedoor\TmdMidtransIris;
 
 use InvalidArgumentException;
+use Timedoor\TmdMidtransIris\Aggregator\BankAccount as AggregatorBankAccount;
 use Timedoor\TmdMidtransIris\Aggregator\TopUp;
 use Timedoor\TmdMidtransIris\Api\ApiClient;
 use Timedoor\TmdMidtransIris\Api\IApiClient;
 use Timedoor\TmdMidtransIris\BankAccount;
 use Timedoor\TmdMidtransIris\Beneficiary;
+use Timedoor\TmdMidtransIris\Facilitator\BankAccount as FacilitatorBankAccount;
 use Timedoor\TmdMidtransIris\Payout;
 use Timedoor\TmdMidtransIris\Transaction;
 use Timedoor\TmdMidtransIris\Utils\Map;
@@ -94,10 +96,18 @@ class Iris
     /**
      * Bank Account Service
      *
-     * @return \Timedoor\TmdMidtransIris\BankAccount
+     * @return \Timedoor\TmdMidtransIris\BankAccount|\Timedoor\TmdMidtransIris\Aggregator\BankAccount|\Timedoor\TmdMidtransIris\Facilitator\BankAccount
      */
-    public function bankAccount()
+    public function bankAccount(?string $accountType = null)
     {
+        if (!is_null($accountType)) {
+            if ($accountType === AccountType::AGGREGATOR) {
+                return new AggregatorBankAccount($this->_apiClient);
+            } else if ($accountType === AccountType::FACILITATOR) {
+                return new FacilitatorBankAccount($this->_apiClient);
+            }
+        }
+
         return $this->_bankAccount; 
     }
 
@@ -119,6 +129,16 @@ class Iris
     public function topUp()
     {
         return $this->_topUp; 
+    }
+
+    /**
+     * Get the API Client
+     *
+     * @return  \Timedoor\TmdMidtransIris\Api\IApiClient
+     */ 
+    public function getApiClient()
+    {
+        return $this->_apiClient;
     }
 
     /**
