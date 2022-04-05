@@ -4,7 +4,7 @@ namespace Timedoor\TmdMidtransIris;
 
 use Timedoor\TmdMidtransIris\Api\IApiClient;
 
-class BaseService
+abstract class BaseService
 {
     /**
      * Api Client
