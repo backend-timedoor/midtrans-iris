@@ -14,8 +14,7 @@ class BadRequestException extends Exception
 
         parent::__construct(
             is_null($message) ? 'Bad Request' : $message,
-            $code,
-            null
+            $code
         );
     }
 

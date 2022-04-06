@@ -12,12 +12,12 @@ use Timedoor\TmdMidtransIris\Config;
 use Timedoor\TmdMidtransIris\Utils\Json;
 use Timedoor\TmdMidtransIris\Utils\Str;
 
-class ApiClient implements IApiClient
+class ApiClient implements ApiClientInterface
 {
     /**
      * GuzzleHttp Client
      *
-     * @var Client
+     * @var \GuzzleHttp\Client
      */
     private $httpClient;
 
@@ -33,6 +33,12 @@ class ApiClient implements IApiClient
      */
     private const API_BASE_PATH = '/api/v1';
     
+    /**
+     * Constructor of ApiClient
+     *
+     * @param array     $options
+     * @param string    $actor
+     */
     public function __construct($options = [], $actor = Actor::CREATOR)
     {
         $this->actor = $actor;
@@ -45,7 +51,7 @@ class ApiClient implements IApiClient
     /**
      * Create a new http client
      *
-     * @return void
+     * @return \GuzzleHttp\Client
      */
     public function newHttpClient($options = [])
     {
@@ -57,11 +63,11 @@ class ApiClient implements IApiClient
     /**
      * Make a POST request
      *
-     * @param   string            $path
-     * @param   JsonSerializable  $body
-     * @param   array             $headers
-     * @param   array             $query
-     * @return  mixed
+     * @param   string              $path
+     * @param   \JsonSerializable   $body
+     * @param   array               $headers
+     * @param   array               $query
+     * @return  \Timedoor\TmdMidtransIris\Api\ApiResponse
      */
     public function post($path, JsonSerializable $body, $headers = [], $query = [])
     {
@@ -71,11 +77,11 @@ class ApiClient implements IApiClient
     /**
      * Make a PATCH request
      *
-     * @param   string            $path
-     * @param   JsonSerializable  $body
-     * @param   array             $headers
-     * @param   array             $query
-     * @return  mixed
+     * @param   string              $path
+     * @param   \JsonSerializable   $body
+     * @param   array               $headers
+     * @param   array               $query
+     * @return  \Timedoor\TmdMidtransIris\Api\ApiResponse
      */
     public function patch($path, JsonSerializable $body, $headers = [], $query = [])
     {
@@ -88,7 +94,7 @@ class ApiClient implements IApiClient
      * @param   string  $path
      * @param   array   $headers
      * @param   array   $query
-     * @return  mixed
+     * @return  \Timedoor\TmdMidtransIris\Api\ApiResponse
      */
     public function get($path, $headers = [], $query = [])
     {
@@ -100,10 +106,10 @@ class ApiClient implements IApiClient
      *
      * @param   string                  $method
      * @param   string                  $path
-     * @param   JsonSerializable|null   $body
+     * @param   \JsonSerializable|null  $body
      * @param   array                   $headers
      * @param   array                   $query
-     * @return  ApiResponse
+     * @return  \Timedoor\TmdMidtransIris\Api\ApiResponse
      */
     public function call($method, $path, ?JsonSerializable $body = null, $headers = [], $query = [])
     {
@@ -141,6 +147,15 @@ class ApiClient implements IApiClient
         }
     }
 
+    /**
+     * Build http configuration based on the request options
+     *
+     * @param   string                  $method
+     * @param   \JsonSerializable|null  $body
+     * @param   array                   $headers
+     * @param   array                   $query
+     * @return  array
+     */
     public function buildHttpConfiguration($method, ?JsonSerializable $body = null, $headers = [], $query = [])
     {
         $headers = array_merge($headers, [

@@ -2,8 +2,10 @@
 
 namespace Timedoor\TmdMidtransIris\Utils;
 
+use Exception;
 use Timedoor\TmdMidtransIris\Api\ApiResponse;
 use Timedoor\TmdMidtransIris\Exception\BadRequestException;
+use Timedoor\TmdMidtransIris\Exception\GeneralException;
 use Timedoor\TmdMidtransIris\Exception\UnauthorizedRequestException;
 
 class ConvertException
@@ -11,13 +13,15 @@ class ConvertException
     /**
      * Convert any exception to the desired exception class
      *
-     * @param   ApiResponse $resp
-     * @throws  Exception
+     * @param   \Timedoor\TmdMidtransIris\Api\ApiResponse $resp
+     * @throws  \Exception
      */
     public static function fromResponse(ApiResponse $resp)
     {
         if ($resp->isError()) {
-            if ($resp->getCode() == 401) {
+            $code = $resp->getCode();
+
+            if ($code == 401) {
                 $body       = new Map($resp->getBody());
                 $errorMsg   = $body->get('error_message');
 
@@ -25,17 +29,19 @@ class ConvertException
                     $errorMsg,
                     $body->get('errors')
                 );
-            } else if (($resp->getCode() == 400) || ($resp->getCode() == 404)) {
+            } else if (($code == 400) || ($code == 404)) {
                 $body       = new Map($resp->getBody());
                 $errorMsg   = !is_null($body->get('error_message'))
                                 ? $body->get('error_message')
                                 : $resp->getErrors();
 
                 throw new BadRequestException(
-                    $resp->getCode(),
+                    $code,
                     $errorMsg,
                     $body->get('errors', [])
                 );
+            } else if ($code === 0) {
+                throw new GeneralException($resp->getErrors(), $code);
             }
         }
     }

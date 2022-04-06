@@ -2,18 +2,18 @@
 
 namespace Timedoor\TmdMidtransIris;
 
-use Timedoor\TmdMidtransIris\Api\IApiClient;
+use Timedoor\TmdMidtransIris\Api\ApiClientInterface;
 
 abstract class BaseService
 {
     /**
      * Api Client
      *
-     * @var \Timedoor\TmdMidtransIris\Api\IApiClient
+     * @var \Timedoor\TmdMidtransIris\Api\ApiClientInterface
      */
     protected $apiClient;
 
-    public function __construct(IApiClient $apiClient)
+    public function __construct(ApiClientInterface $apiClient)
     {
         $this->apiClient = $apiClient; 
     }
@@ -21,7 +21,7 @@ abstract class BaseService
     /**
      * Get api Client
      *
-     * @return  \Timedoor\TmdMidtransIris\Api\IApiClient
+     * @return  \Timedoor\TmdMidtransIris\Api\ApiClientInterface
      */ 
     public function getApiClient()
     {
@@ -31,11 +31,11 @@ abstract class BaseService
     /**
      * Set api Client
      *
-     * @param  \Timedoor\TmdMidtransIris\Api\IApiClient  $apiClient  Api Client
+     * @param  \Timedoor\TmdMidtransIris\Api\ApiClientInterface  $apiClient  Api Client
      *
      * @return  self
      */ 
-    public function setApiClient(IApiClient $apiClient)
+    public function setApiClient(ApiClientInterface $apiClient)
     {
         $this->apiClient = $apiClient;
 

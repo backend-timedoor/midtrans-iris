@@ -5,7 +5,7 @@ namespace Timedoor\TmdMidtransIris;
 use DateTime;
 use GuzzleHttp\Psr7\Response;
 use Timedoor\TmdMidtransIris\Api\ApiResponse;
-use Timedoor\TmdMidtransIris\Api\IApiClient;
+use Timedoor\TmdMidtransIris\Api\ApiClientInterface;
 use Timedoor\TmdMidtransIris\Models\Transaction as TransactionModel;
 use Timedoor\TmdMidtransIris\Transaction;
 use Timedoor\TmdMidtransIris\Utils\Json;
@@ -16,7 +16,7 @@ class TransactionTest extends BaseTestCase
 
     public function testGetHistoryParameters()
     {
-        $apiClientMock  = $this->getMockForAbstractClass(IApiClient::class);
+        $apiClientMock  = $this->getMockForAbstractClass(ApiClientInterface::class);
         $service        = new Transaction($apiClientMock);
 
         $fromDate   = new DateTime('2022-04-05');

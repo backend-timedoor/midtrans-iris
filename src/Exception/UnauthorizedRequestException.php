@@ -14,8 +14,7 @@ class UnauthorizedRequestException extends Exception
 
         parent::__construct(
             is_null($message) ? 'Please check your API or Merchant key' : $message,
-            401,
-            null
+            401
         );
     }
 

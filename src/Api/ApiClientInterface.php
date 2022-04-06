@@ -4,26 +4,26 @@ namespace Timedoor\TmdMidtransIris\Api;
 
 use JsonSerializable;
 
-interface IApiClient {
+interface ApiClientInterface {
     /**
      * Make a POST request
      *
-     * @param   string            $path
-     * @param   JsonSerializable  $body
-     * @param   array             $headers
-     * @param   array             $query
-     * @return  ApiResponse
+     * @param   string              $path
+     * @param   \JsonSerializable   $body
+     * @param   array               $headers
+     * @param   array               $query
+     * @return  \Timedoor\TmdMidtransIris\Api\ApiResponse
      */
     public function post($path, JsonSerializable $body, $headers = [], $query = []);
 
     /**
      * Make a PATCH request
      *
-     * @param   string            $path
-     * @param   JsonSerializable  $body
-     * @param   array             $headers
-     * @param   array             $query
-     * @return  ApiResponse
+     * @param   string              $path
+     * @param   \JsonSerializable   $body
+     * @param   array               $headers
+     * @param   array               $query
+     * @return  \Timedoor\TmdMidtransIris\Api\ApiResponse
      */
     public function patch($path, JsonSerializable $body, $headers = [], $query = []);
 
@@ -33,7 +33,7 @@ interface IApiClient {
      * @param   string  $path
      * @param   array   $headers
      * @param   array   $query
-     * @return  ApiResponse
+     * @return  \Timedoor\TmdMidtransIris\Api\ApiResponse
      */
     public function get($path, $headers = [], $query = []);
 }

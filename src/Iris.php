@@ -6,7 +6,7 @@ use InvalidArgumentException;
 use Timedoor\TmdMidtransIris\Aggregator\BankAccount as AggregatorBankAccount;
 use Timedoor\TmdMidtransIris\Aggregator\TopUp;
 use Timedoor\TmdMidtransIris\Api\ApiClient;
-use Timedoor\TmdMidtransIris\Api\IApiClient;
+use Timedoor\TmdMidtransIris\Api\ApiClientInterface;
 use Timedoor\TmdMidtransIris\BankAccount;
 use Timedoor\TmdMidtransIris\Beneficiary;
 use Timedoor\TmdMidtransIris\Facilitator\BankAccount as FacilitatorBankAccount;
@@ -19,7 +19,7 @@ class Iris
     /**
      * The API Client
      *
-     * @var \Timedoor\TmdMidtransIris\Api\IApiClient
+     * @var \Timedoor\TmdMidtransIris\Api\ApiClientInterface
      */
     private $_apiClient;
 
@@ -134,7 +134,7 @@ class Iris
     /**
      * Get the API Client
      *
-     * @return  \Timedoor\TmdMidtransIris\Api\IApiClient
+     * @return  \Timedoor\TmdMidtransIris\Api\ApiClientInterface
      */ 
     public function getApiClient()
     {
@@ -144,11 +144,11 @@ class Iris
     /**
      * Set the API Client
      *
-     * @param  \Timedoor\TmdMidtransIris\Api\IApiClient  $_apiClient  The API Client
+     * @param  \Timedoor\TmdMidtransIris\Api\ApiClientInterface  $_apiClient  The API Client
      *
      * @return  self
      */ 
-    public function setApiClient(IApiClient $_apiClient)
+    public function setApiClient(ApiClientInterface $_apiClient)
     {
         $this->_apiClient = $_apiClient;
 
