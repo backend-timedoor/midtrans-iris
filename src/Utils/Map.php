@@ -2,6 +2,8 @@
 
 namespace Timedoor\TmdMidtransIris\Utils;
 
+use ArrayAccess;
+
 class Map
 {
     /**
@@ -13,7 +15,9 @@ class Map
 
     public function __construct($attributes = [])
     {
-        $this->attributes = $attributes; 
+        if (is_array($attributes) || $attributes instanceof ArrayAccess) {
+            $this->attributes = $attributes; 
+        }
     }
 
     /**

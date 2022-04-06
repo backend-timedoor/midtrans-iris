@@ -4,8 +4,8 @@ namespace Timedoor\TmdMidtransIris;
 
 use Timedoor\TmdMidtransIris\Models\Bank;
 use Timedoor\TmdMidtransIris\Models\BankAccountValidated;
-use Timedoor\TmdMidtransIris\Utils\Map;
 use Timedoor\TmdMidtransIris\Utils\ConvertException;
+use Timedoor\TmdMidtransIris\Utils\Map;
 
 class BankAccount extends BaseService
 {
@@ -21,19 +21,11 @@ class BankAccount extends BaseService
         
         ConvertException::fromResponse($response);
 
-        $body   = $response->getBody()['beneficiary_banks'];
-        $result = [];
+        $body = new Map($response->getBody());
 
-        if (is_array($body)) {
-            foreach ($body as $item) {
-                $item       = new Map($item);
-                $result[]   = (new Bank)
-                                ->setCode($item->get('code'))
-                                ->setName($item->get('name'));
-            }
-        }
-
-        return $result;
+        return array_map(function ($item) {
+            return Bank::fromArray($item);
+        }, $body->get('beneficiary_banks', []));
     }
 
     /**
@@ -53,12 +45,6 @@ class BankAccount extends BaseService
 
         ConvertException::fromResponse($response);
 
-        $body = new Map($response->getBody());
-
-        return (new BankAccountValidated)
-                ->setId($body->get('id'))
-                ->setAccountName($body->get('account_name'))
-                ->setaccountNo($body->get('account_no'))
-                ->setBankName($body->get('bank_name'));
+        return BankAccountValidated::fromArray($response->getBody());
     }
 }

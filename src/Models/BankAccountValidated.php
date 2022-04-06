@@ -3,8 +3,9 @@
 namespace Timedoor\TmdMidtransIris\Models;
 
 use JsonSerializable;
+use Timedoor\TmdMidtransIris\Utils\DataMapper;
 
-class BankAccountValidated implements JsonSerializable
+final class BankAccountValidated extends DataMapper implements JsonSerializable
 {
     /**
      * @var string
@@ -39,6 +40,21 @@ class BankAccountValidated implements JsonSerializable
             'account_name'      => $this->accountName,
             'account_no'        => $this->accountNo
         ];
+    }
+
+    /**
+     * Data mapper describe how the given data should mapped with its setter method
+     *
+     * @return array
+     */
+    public function mapper(): array
+    {
+        return [
+            'setId'             => 'bank_account_id',
+            'setBankName'       => 'bank_name',
+            'setAccountName'    => 'account_name',
+            'setAccountNo'      => 'account_no'
+        ]; 
     }
 
     /**
@@ -118,7 +134,7 @@ class BankAccountValidated implements JsonSerializable
      *
      * @return  string
      */ 
-    public function getaccountNo()
+    public function getAccountNo()
     {
         return $this->accountNo;
     }
@@ -130,7 +146,7 @@ class BankAccountValidated implements JsonSerializable
      *
      * @return  self
      */ 
-    public function setaccountNo($accountNo)
+    public function setAccountNo($accountNo)
     {
         $this->accountNo = $accountNo;
 

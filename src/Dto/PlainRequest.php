@@ -4,7 +4,7 @@ namespace Timedoor\TmdMidtransIris\Dto;
 
 use JsonSerializable;
 
-class PlainRequest implements JsonSerializable
+final class PlainRequest implements JsonSerializable
 {
     /**
      * The request body

@@ -5,7 +5,6 @@ namespace Timedoor\TmdMidtransIris;
 use DateTime;
 use Timedoor\TmdMidtransIris\Models\Transaction as TransactionModel;
 use Timedoor\TmdMidtransIris\Utils\ConvertException;
-use Timedoor\TmdMidtransIris\Utils\Map;
 
 class Transaction extends BaseService
 {
@@ -16,6 +15,7 @@ class Transaction extends BaseService
      *
      * @param   \DateTime|null $from
      * @param   \DateTime|null $to
+     * @throws  \Timedoor\TmdMidtransIris\Exception\UnauthorizedRequestException
      * @return  \Timedoor\TmdMidtransIris\Models\Transaction[]
      */
     public function history(?DateTime $from = null, ?DateTime $to = null)
@@ -29,21 +29,8 @@ class Transaction extends BaseService
         
         ConvertException::fromResponse($response);
 
-        $result = [];
-
-        foreach ($response->getBody() as $item) {
-            $item       = new Map($item);
-            $result[]   = (new TransactionModel)
-                            ->setRefNo($item->get('reference_no'))
-                            ->setBeneficiaryName($item->get('beneficiary_name'))
-                            ->setBeneficiaryAccount($item->get('beneficiary_account'))
-                            ->setAccount($item->get('account'))
-                            ->setType($item->get('type'))
-                            ->setAmount($item->get('amount'))
-                            ->setStatus($item->get('status'))
-                            ->setCreatedAt($item->get('created_at'));
-        }
-
-        return $result;
+        return array_map(function ($item) {
+            return TransactionModel::fromArray($item);
+        }, $response->getBody() ?? []);
     }
 }

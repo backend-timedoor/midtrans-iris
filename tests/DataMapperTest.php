@@ -82,12 +82,12 @@ class DummyData extends DataMapper
         return $this;
     }
 
-    protected function getMapper(): array
+    public function mapper(): array
     {
         return [
-            'setId' => 'id',
-            'setName' => 'name',
-            'setDate' => 'date'
+            'setId'     => 'id',
+            'setName'   => 'name',
+            'setDate'   => 'date'
         ];
     }
 }

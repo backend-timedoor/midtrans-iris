@@ -13,7 +13,7 @@ class BankAccount extends BaseService
      * Get all bank accounts
      * 
      * @throws  \Timedoor\TmdMidtransIris\Exception\UnauthorizedRequestException
-     * @return  BankAccountModel[]
+     * @return  \Timedoor\TmdMidtransIris\Models\BankAccount[]
      */
     public function all()
     {
@@ -21,22 +21,9 @@ class BankAccount extends BaseService
 
         ConvertException::fromResponse($response);
 
-        $body   = $response->getBody();
-        $result = [];
-
-        if (is_array($body)) {
-            foreach ($body as $item) {
-                $item       = new Map($item);
-                $result[]   = (new BankAccountModel)
-                                ->setId($item->get('bank_account_id'))
-                                ->setBankName($item->get('bank_name'))
-                                ->setAccountName($item->get('account_name'))
-                                ->setAccountNumber($item->get('account_number'))
-                                ->setStatus($item->get('status'));
-            }
-        }
-
-        return $result;
+        return array_map(function ($item) {
+            return BankAccountModel::fromArray($item);
+        }, $response->getBody() ?? []);
     }
 
     /**

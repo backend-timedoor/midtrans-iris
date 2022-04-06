@@ -3,8 +3,9 @@
 namespace Timedoor\TmdMidtransIris\Models;
 
 use JsonSerializable;
+use Timedoor\TmdMidtransIris\Utils\DataMapper;
 
-class Payout implements JsonSerializable
+final class Payout extends DataMapper implements JsonSerializable
 {
     /**
      * @var int
@@ -80,6 +81,28 @@ class Payout implements JsonSerializable
             'created_by'            => $this->createdBy,
             'created_at'            => $this->createdAt,
             'updated_at'            => $this->updatedAt
+        ]; 
+    }
+
+    /**
+     * Data mapper describe how the given data should mapped with its setter method
+     *
+     * @return array
+     */
+    public function mapper(): array
+    {
+        return [
+            'setAmount'             => 'amount',
+            'setBeneficiaryName'    => 'beneficiary_name',
+            'setBeneficiaryAccount' => 'beneficiary_account',
+            'setBeneficiaryEmail'   => 'beneficiary_email',
+            'setBank'               => 'bank',
+            'setRefNo'              => 'reference_no',
+            'setNotes'              => 'notes',
+            'setStatus'             => 'status',
+            'setCreatedBy'          => 'created_by',
+            'setCreatedAt'          => 'created_at',
+            'setUpdatedAt'          => 'updated_at',
         ]; 
     }
 

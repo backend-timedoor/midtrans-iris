@@ -5,7 +5,7 @@ namespace Timedoor\TmdMidtransIris\Models;
 use JsonSerializable;
 use Timedoor\TmdMidtransIris\Utils\DataMapper;
 
-class TopUpChannel extends DataMapper implements JsonSerializable
+final class TopUpChannel extends DataMapper implements JsonSerializable
 {
     /**
      * @var int
@@ -22,12 +22,31 @@ class TopUpChannel extends DataMapper implements JsonSerializable
      */
     private $vAccountNumber;
 
+    /**
+     * Define how data should be serialized using json
+     *
+     * @return array
+     */
     public function jsonSerialize()
     {
         return [
             'id'                        => $this->id,
             'virtual_account_type'      => $this->vAccountType,
             'virtual_account_number'    => $this->vAccountNumber
+        ]; 
+    }
+
+    /**
+     * Data mapper describe how the given data should mapped with its setter method
+     *
+     * @return array
+     */
+    public function mapper(): array
+    {
+        return [
+            'setId'             => 'id',
+            'setVAccountType'   => 'virtual_account_type',
+            'setVAccountNumber' => 'virtual_account_number'
         ]; 
     }
 
@@ -101,14 +120,5 @@ class TopUpChannel extends DataMapper implements JsonSerializable
         $this->vAccountNumber = $vAccountNumber;
 
         return $this;
-    }
-
-    protected function getMapper(): array
-    {
-        return [
-            'setId'             => 'id',
-            'setVAccountType'   => 'virtual_account_type',
-            'setVAccountNumber' => 'virtual_account_number'
-        ]; 
     }
 }

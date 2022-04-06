@@ -6,21 +6,19 @@ use Timedoor\TmdMidtransIris\Dto\PayoutNotification;
 use Timedoor\TmdMidtransIris\Dto\PayoutRequest;
 use Timedoor\TmdMidtransIris\Dto\PayoutRequestCollection;
 use Timedoor\TmdMidtransIris\Dto\PlainRequest;
-use Timedoor\TmdMidtransIris\Exception\BadRequestException;
-use Timedoor\TmdMidtransIris\Exception\UnauthorizedRequestException;
 use Timedoor\TmdMidtransIris\Models\Payout as PayoutModel;
-use Timedoor\TmdMidtransIris\Utils\Map;
 use Timedoor\TmdMidtransIris\Utils\ConvertException;
 use Timedoor\TmdMidtransIris\Utils\Json;
+use Timedoor\TmdMidtransIris\Utils\Map;
 
 class Payout extends BaseService
 {
     /**
      * Create a new payout
      *
-     * @param   PayoutRequest[]
-     * @throws  UnauthorizedRequestException|BadRequestException
-     * @return  PayoutModel[]
+     * @param   \Timedoor\TmdMidtransIris\Dto\PayoutRequest[]
+     * @throws  \Timedoor\TmdMidtransIris\Exception\UnauthorizedRequestException|\Timedoor\TmdMidtransIris\Exception\BadRequestException
+     * @return  \Timedoor\TmdMidtransIris\Models\Payout[]
      */
     public function create(array $reqs)
     {
@@ -36,17 +34,11 @@ class Payout extends BaseService
 
         ConvertException::fromResponse($response);
 
-        $body   = $response->getBody();
-        $result = [];
+        $body = new Map($response->getBody());
 
-        foreach ($body['payouts'] as $item) {
-            $item       = new Map($item);
-            $result[]   = (new PayoutModel)
-                            ->setRefNo($item->get('reference_no'))
-                            ->setStatus($item->get('status'));
-        }
-
-        return $result;
+        return array_map(function ($item) {
+            return PayoutModel::fromArray($item);
+        }, $body->get('payouts', []));
     }
 
     /**
@@ -54,7 +46,7 @@ class Payout extends BaseService
      *
      * @param   array       $refNos
      * @param   string|null $otp
-     * @throws  UnauthorizedRequestException|BadRequestException
+     * @throws  \Timedoor\TmdMidtransIris\Exception\UnauthorizedRequestException|\Timedoor\TmdMidtransIris\Exception\BadRequestException
      * @return  array
      */
     public function approve(array $refNos, ?string $otp = null)
@@ -77,9 +69,9 @@ class Payout extends BaseService
     /**
      * Reject an existing payout(s)
      *
-     * @param   array $refNos
-     * @param   string $reason
-     * @throws  UnauthorizedRequestException|BadRequestException
+     * @param   array   $refNos
+     * @param   string  $reason
+     * @throws  \Timedoor\TmdMidtransIris\Exception\UnauthorizedRequestException|\Timedoor\TmdMidtransIris\Exception\BadRequestException
      * @return  array
      */
     public function reject(array $refNos, string $reason)
@@ -99,8 +91,8 @@ class Payout extends BaseService
      * Get an existing payout by reference number
      *
      * @param   string $refNo
-     * @throws  UnauthorizedRequestException|BadRequestException
-     * @return  PayoutModel
+     * @throws  \Timedoor\TmdMidtransIris\Exception\UnauthorizedRequestException|\Timedoor\TmdMidtransIris\Exception\BadRequestException
+     * @return  \Timedoor\TmdMidtransIris\Models\Payout
      */
     public function get($refNo)
     {
@@ -108,28 +100,14 @@ class Payout extends BaseService
 
         ConvertException::fromResponse($response);
 
-        $body   = new Map($response->getBody());
-        $result = (new PayoutModel)
-                    ->setAmount($body->get('amount'))
-                    ->setBeneficiaryName($body->get('beneficiary_name'))
-                    ->setBeneficiaryAccount($body->get('beneficiary_account'))
-                    ->setBeneficiaryEmail($body->get('beneficiary_email'))
-                    ->setBank($body->get('bank'))
-                    ->setRefNo($body->get('reference_no'))
-                    ->setNotes($body->get('notes'))
-                    ->setStatus($body->get('status'))
-                    ->setCreatedBy($body->get('created_by'))
-                    ->setCreatedAt($body->get('created_at'))
-                    ->setUpdatedAt($body->get('updated_at'));
-
-        return $result;
+        return PayoutModel::fromArray($response->getBody() ?? []);
     }
 
     /**
      * Validate incoming notification
      *
-     * @param   string              $signature
-     * @param   PayoutNotification  $payload
+     * @param   string                                              $signature
+     * @param   \Timedoor\TmdMidtransIris\Dto\PayoutNotification    $payload
      * @return  boolean
      */
     public function validateNotification($signature, PayoutNotification $payload)
@@ -140,7 +118,7 @@ class Payout extends BaseService
     /**
      * Create a signature out of payout notification
      *
-     * @param   PayoutNotification $payload
+     * @param   \Timedoor\TmdMidtransIris\Dto\PayoutNotification $payload
      * @return  string
      */
     public function createNotificationSignature(PayoutNotification $payload)

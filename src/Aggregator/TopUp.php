@@ -19,12 +19,8 @@ class TopUp extends BaseService
 
         ConvertException::fromResponse($response);
 
-        $result = [];
-
-        foreach ($response->getBody() as $item) {
-            $result[] = TopUpChannel::fromArray($item);
-        }
-
-        return $result;
+        return array_map(function ($item) {
+            return TopUpChannel::fromArray($item);
+        }, $response->getBody() ?? []);
     }
 }

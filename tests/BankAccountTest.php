@@ -45,7 +45,7 @@ class BankAccountTest extends BaseTestCase
         $bankAccount = (new BankAccountValidated)
                         ->setBankName('bca')
                         ->setAccountName('BCA Simulator A')
-                        ->setaccountNo('0011223344');
+                        ->setAccountNo('0011223344');
 
         $errorExpect = [
             'id'            => 'e2c60cbd3c7a453bbc843b1f2b2e9025',
@@ -72,7 +72,7 @@ class BankAccountTest extends BaseTestCase
         }
 
         $response = $service->validate(
-            $bankAccount->getBankName(), $bankAccount->getaccountNo()
+            $bankAccount->getBankName(), $bankAccount->getAccountNo()
         );
 
         // manually set the id, because the id from the api are always different for every request

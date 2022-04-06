@@ -3,7 +3,6 @@
 namespace Timedoor\TmdMidtransIris;
 
 use Timedoor\TmdMidtransIris\Models\Beneficiary as BeneficiaryModel;
-use Timedoor\TmdMidtransIris\Utils\Map;
 use Timedoor\TmdMidtransIris\Utils\ConvertException;
 
 class Beneficiary extends BaseService
@@ -11,8 +10,8 @@ class Beneficiary extends BaseService
     /**
      * Create a new beneficiary account
      *
-     * @param   BeneficiaryModel $data
-     * @throws  UnauthorizedRequestException|BadRequestException
+     * @param   \Timedoor\TmdMidtransIris\Models\Beneficiary $data
+     * @throws  \Timedoor\TmdMidtransIris\Exception\UnauthorizedRequestException|\Timedoor\TmdMidtransIris\Exception\BadRequestException
      * @return  array
      */
     public function create(BeneficiaryModel $data)
@@ -27,9 +26,9 @@ class Beneficiary extends BaseService
     /**
      * Update existing beneficiary
      *
-     * @param   string              $alias
-     * @param   BeneficiaryModel    $data
-     * @throws  UnauthorizedRequestException|BadRequestException
+     * @param   string                                          $alias
+     * @param   \Timedoor\TmdMidtransIris\Models\Beneficiary    $data
+     * @throws  \Timedoor\TmdMidtransIris\Exception\UnauthorizedRequestException|\Timedoor\TmdMidtransIris\Exception\BadRequestException
      * @return  array
      */
     public function update($alias, BeneficiaryModel $data)
@@ -43,8 +42,9 @@ class Beneficiary extends BaseService
 
     /**
      * Get list of beneficiaries
-     * @throws  UnauthorizedRequestException
-     * @return  Beneficiary[]
+     * 
+     * @throws  \Timedoor\TmdMidtransIris\Exception\UnauthorizedRequestException
+     * @return  \Timedoor\TmdMidtransIris\Models\Beneficiary[]
      */
     public function all()
     {
@@ -52,19 +52,8 @@ class Beneficiary extends BaseService
 
         ConvertException::fromResponse($response);
 
-        $body   = $response->getBody();
-        $result = [];
-
-        foreach ($body as $item) {
-            $item       = new Map($item);
-            $result[]   = (new BeneficiaryModel)
-                            ->setName($item->get('name'))
-                            ->setBank($item->get('bank'))
-                            ->setAccount($item->get('account'))
-                            ->setAliasName($item->get('alias'))
-                            ->setEmail($item->get('email'));
-        } 
-
-        return $result;
+        return array_map(function ($item) {
+            return BeneficiaryModel::fromArray($item) ;
+        }, $response->getBody() ?? []);
     }
 }

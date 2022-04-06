@@ -13,7 +13,7 @@ abstract class DataMapper
      *
      * @return array
      */
-    protected abstract function getMapper(): array;
+    public abstract function mapper(): array;
 
     /**
      * Create a new instance of the child class
@@ -35,11 +35,15 @@ abstract class DataMapper
     {
         $instance = static::getInstance(); 
 
-        if (count($instance->getMapper()) > 0) {
-            $data = new Map($data);
+        if (count($instance->mapper()) > 0) {
+            $mapper = new Map(array_flip($instance->mapper()));
 
-            foreach ($instance->getMapper() as $key => $value) {
-                call_user_func([$instance, $key], $data->get($value));
+            foreach ($data as $field => $value) {
+                $setter = $mapper->get($field);
+
+                if (method_exists($instance, $setter)) {
+                    call_user_func([$instance, $setter], $value);
+                }
             }
         }
 

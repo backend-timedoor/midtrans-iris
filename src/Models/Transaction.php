@@ -5,7 +5,7 @@ namespace Timedoor\TmdMidtransIris\Models;
 use JsonSerializable;
 use Timedoor\TmdMidtransIris\Utils\DataMapper;
 
-class Transaction extends DataMapper implements JsonSerializable
+final class Transaction extends DataMapper implements JsonSerializable
 {
     /**
      * @var string
@@ -63,6 +63,25 @@ class Transaction extends DataMapper implements JsonSerializable
             'amount'                => $this->amount,
             'status'                => $this->status,
             'created_at'            => $this->createdAt
+        ]; 
+    }
+
+    /**
+     * Data mapper describe how the given data should mapped with its setter method
+     *
+     * @return array
+     */
+    public function mapper(): array
+    {
+        return [
+            'setRefNo'              => 'reference_no',
+            'setBeneficiaryName'    => 'beneficiary_name',
+            'setBeneficiaryAccount' => 'beneficiary_account',
+            'setAccount'            => 'account',
+            'setType'               => 'type',
+            'setAmount'             => 'amount',
+            'setStatus'             => 'status',
+            'setCreatedAt'          => 'created_at',
         ]; 
     }
 
@@ -256,24 +275,5 @@ class Transaction extends DataMapper implements JsonSerializable
         $this->createdAt = $createdAt;
 
         return $this;
-    }
-
-    /**
-     * Data mapper describe how the given data should mapped with its setter method
-     *
-     * @return array
-     */
-    protected function getMapper(): array
-    {
-        return [
-            'setRefNo'              => 'reference_no',
-            'setBeneficiaryName'    => 'beneficiary_name',
-            'setBeneficiaryAccount' => 'beneficiary_account',
-            'setAccount'            => 'account',
-            'setType'               => 'type',
-            'setAmount'             => 'amount',
-            'setStatus'             => 'status',
-            'setCreatedAt'          => 'created_at',
-        ]; 
     }
 }

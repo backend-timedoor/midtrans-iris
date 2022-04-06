@@ -3,8 +3,9 @@
 namespace Timedoor\TmdMidtransIris\Dto;
 
 use JsonSerializable;
+use Timedoor\TmdMidtransIris\Utils\DataMapper;
 
-class PayoutNotification implements JsonSerializable
+final class PayoutNotification extends DataMapper implements JsonSerializable
 {
     /**
      * @var string
@@ -50,6 +51,23 @@ class PayoutNotification implements JsonSerializable
             'updated_at'    => $this->updatedAt,
             'error_code'    => $this->errorCode,
             'error_message' => $this->errorMsg
+        ]; 
+    }
+
+    /**
+     * Data mapper describe how the given data should mapped with its setter method
+     *
+     * @return array
+     */
+    public function mapper(): array
+    {
+        return [
+            'setRefNo'      => 'reference_no',
+            'setAmount'     => 'amount',
+            'setStatus'     => 'status',
+            'setUpdatedAt'  => 'updated_at',
+            'setErrorCode'  => 'error_code',
+            'setErrorMsg'   => 'error_message',
         ]; 
     }
 

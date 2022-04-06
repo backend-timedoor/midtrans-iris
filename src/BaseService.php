@@ -9,7 +9,7 @@ abstract class BaseService
     /**
      * Api Client
      *
-     * @var IApiClient
+     * @var \Timedoor\TmdMidtransIris\Api\IApiClient
      */
     protected $apiClient;
 
@@ -21,7 +21,7 @@ abstract class BaseService
     /**
      * Get api Client
      *
-     * @return  IApiClient
+     * @return  \Timedoor\TmdMidtransIris\Api\IApiClient
      */ 
     public function getApiClient()
     {
@@ -31,7 +31,7 @@ abstract class BaseService
     /**
      * Set api Client
      *
-     * @param  IApiClient  $apiClient  Api Client
+     * @param  \Timedoor\TmdMidtransIris\Api\IApiClient  $apiClient  Api Client
      *
      * @return  self
      */ 

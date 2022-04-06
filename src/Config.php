@@ -52,8 +52,8 @@ class Config
     /**
      * Build an absolute url with the given path
      *
-     * @param string $path
-     * @return string
+     * @param   string $path
+     * @return  string
      */
     public static function buildUrl($path)
     {
