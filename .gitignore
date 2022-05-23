@@ -7,3 +7,4 @@ phpunit.integration.xml
 
 # other files
 docker-compose.yml
+.twig
