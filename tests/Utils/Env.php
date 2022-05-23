@@ -2,8 +2,6 @@
 
 namespace Timedoor\TmdMidtransIris\Utils;
 
-use Timedoor\TmdMidtransIris\Utils\Map;
-
 class Env
 {
     /**
@@ -14,7 +12,7 @@ class Env
      */
     public static function has($key)
     {
-        return static::vars()->has($key);
+        return static::get($key) !== null;
     }
 
     /**
@@ -26,7 +24,13 @@ class Env
      */
     public static function get($key, $default = null)
     {
-        return static::vars()->get($key, $default);
+        $value = getenv($key, true);
+
+        if (!$value) {
+            return $default;
+        }
+
+        return $value;
     }
 
     /**
@@ -39,15 +43,5 @@ class Env
     public static function set($key, $value)
     {
         putenv(sprintf("%s=%s", $key, $value));
-    }
-
-    /**
-     * Get all environment variables
-     *
-     * @return Map
-     */
-    public static function vars()
-    {
-        return new Map(getenv()); 
     }
 }

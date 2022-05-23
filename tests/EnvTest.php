@@ -10,7 +10,7 @@ class EnvTest extends BaseTestCase
     {
         Env::set('IRIS_MODE', 'sandbox');
 
-        $this->assertArrayHasKey('IRIS_MODE', Env::vars()->all());
+        $this->assertTrue(Env::has('IRIS_MODE'));
     }
 
     public function testGetEnv()
