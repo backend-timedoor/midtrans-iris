@@ -25,7 +25,6 @@
   - [Transaction History](#transaction-history)
   - [Top Up Channel Information](#top-up-channel-information)
   - [Laravel Support](#laravel-support)
-    - [Without Laravel auto-discovery](#without-laravel-auto-discovery)
 
 ## Intro
 
@@ -314,6 +313,7 @@ $payout = Iris::payout()->get('abc');
 $beneficiaries = Iris::beneficiary()->all();
 ```
 
+<!-- omit in toc -->
 #### Without Laravel auto-discovery
 If you're using a version of Laravel without auto-discovery, you must specify the service provider in your `app/config.php` file:
 
