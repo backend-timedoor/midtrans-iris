@@ -61,6 +61,19 @@ class ApiClient implements ApiClientInterface
     }
 
     /**
+     * Switch between actor
+     *
+     * @param   string $actor
+     * @return  self
+     */
+    public function actingAs($actor)
+    {
+        $this->actor = $actor; 
+
+        return $this;
+    }
+
+    /**
      * Make a POST request
      *
      * @param   string              $path

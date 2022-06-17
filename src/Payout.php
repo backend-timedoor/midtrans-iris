@@ -59,6 +59,7 @@ class Payout extends BaseService
 
         $response = $this
                     ->getApiClient()
+                    ->actingAs(Actor::APPROVER)
                     ->post('/payouts/approve', (new PlainRequest)->setBody($payload));
 
         ConvertException::fromResponse($response);
@@ -80,6 +81,7 @@ class Payout extends BaseService
 
         $response = $this
                     ->getApiClient()
+                    ->actingAs(Actor::APPROVER)
                     ->post('/payouts/reject', (new PlainRequest)->setBody($payload));
 
         ConvertException::fromResponse($response);
