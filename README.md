@@ -315,7 +315,7 @@ $beneficiaries = Iris::beneficiary()->all();
 
 <!-- omit in toc -->
 #### Without Laravel auto-discovery
-If you're using a version of Laravel without auto-discovery, you must specify the service provider in your `app/config.php` file:
+If you're using a version of Laravel without auto-discovery, you must specify the service provider in your `config/app.php` file:
 
 ```php
 \Timedoor\TmdMidtransIris\IrisServiceProvider::class
